@@ -1,6 +1,6 @@
 ---
-title: "Project visualization"
-author: "Kamel"
+title: "Project visualisation des données"
+author: "Kamel MEGHNINE, Abderrahim BENDAHMAN"
 date: "12/03/2020"
 output: html_document
 ---
@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## R Markdown
 
-Chargement de nos données 'Données_météo.csv` et le lire
+Chargement de nos données 'Données_météo.csv`
 Les données date de 18/03/2020 à 12h40
 
 ```{r cars}
@@ -36,58 +36,106 @@ ggplot(data_weather, aes(x=country , y=temp)) + geom_boxplot(color="blue")
 ```{r}
 library(ggplot2)
 ggplot(data_weather, aes(x=temp_min , y=temp_max)) + geom_point(aes(color=country)) + geom_smooth() +
-  ggtitle("Température") +
+  ggtitle("Nuage de point entre température maximal et minimal") +
   xlab("Température minimal") +
   ylab("Température maximal")
 ```
 
 
-```{r}
-library(ggplot2)
-ggplot(data_weather, aes(x=humidity , y=(temp-feels_like) )) + geom_point(aes(color=country)) +
-  ggtitle("Humidité par rapport a (température - température ressenté)") +
-  xlab("Humidité") +
-  ylab("Température")
-```
+On voit qu'il y'a une corrélaion entre Température minimal et maximal 
+on voit aussi qu'il ya pas une grade marge d'ereur jsue un peur au début  de vu que il ya pas bcp d'information  
+
 
 
 ```{r}
 library(ggplot2)
-ggplot(data_weather, aes(x=humidity , y=visibility)) + geom_point(aes(color=country)) + geom_smooth() +
-  ggtitle("Humidité par rapport visibilité") +
+ggplot(data_weather, aes(x=humidity , y=feels_like )) + geom_point(aes(color=feels_like)) +
+  ggtitle("Humidité par rapport à la température ressenté") +
   xlab("Humidité") +
-  ylab("Visibilité")
+  ylab("Température ressenté")
+
 ```
+
+
+Dans ce graphe on à voulu voir s'il ya une relation entre l'hmidité et la température ressenté
+On peut distinguer 3 groupes dans le nuage de point 
+1 - La température de -5° à 22° et l'humidité 37% a 100% Dans ce groupe on remarque la température basse et l'humidité élevé 
+2 - La température de 22° à 29° et l'humidité 0% a 48% Dans ce groupe la température élevé et l'humidité ne dépasse pas 50% la plupart son Afric du sud et 2 sont d'Algerie surment ville du sud (Sahara)
+3 - La température de 30° à 38° et l'humidité 55% a 95% Dans ce groupe on voit une température plus élevé et aussi l'humidité on remarque aussi que le Pays c'est Maldives, c'est iles donc certainnement c'est le lieux qui fait que l'humidité augement aussi avec a la température 
+
 
 
 ```{r}
 library(dplyr)
 library(ggplot2)
 
-by_country <- group_by(data_weather, country)
+by_country <- group_by(data_weather, country, continent)
 country1<-summarise(by_country, visibility = mean(visibility))
  
-ggplot(country1, aes(country, visibility)) + geom_col(fill="blue") +
-  ggtitle("Visibilité par Continent") +
+ggplot(country1, aes(country, visibility)) + geom_col(aes(fill=continent)) +
+  ggtitle("Visibilité moyenne par Pays") +
   xlab("Pays") +
-  ylab("Visibilité (KM)")
-
+  ylab("Visibilité moyenne (KM)")
 ```
+
+
+Ce graphe nous montre la Visibilité moyenne pas Pays et regrouper par Continent 
+on voit que la plupart des pays ont une visibilité moyenne de 10 KM. On remarque que dans le même Continent on trouve L'Algrerie avec une faible visibilité qui est a 6 KM et Afric de sud avec une visibilité plus élevé presque 14 KM
+
 
 
 ```{r}
 library(dplyr)
 library(ggplot2)
 
-by_country <- group_by(data_weather, country)
-country1<-summarise(by_country, humidity = mean(humidity))
+by_country <- group_by(data_weather, continent)
+country1<-summarise(by_country, visibility = mean(visibility))
+
+ggplot(country1, aes(continent, visibility)) + geom_col(aes(fill=continent)) +
+  ggtitle("Visibilité moyenne par Continent") +
+  xlab("Continent") +
+  ylab("Visibilité moyenne (KM)") 
+```
+
+Ce graphe nous montre la Visibilité moyenne par Continent
+On voit qu'il y a pas beaucoup de différence entre les continent
+
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+by_continent <- group_by(data_weather, continent, country)
+dt_continent<-summarise(by_continent, humidity = mean(humidity))
  
-ggplot(country1, aes(country, humidity)) + geom_col(fill="blue") +
-  ggtitle("Humidité par Continent") +
-  xlab("Pays") +
-  ylab("Humidité")
+ggplot(dt_continent, aes(continent, humidity)) + geom_col(aes(fill=country), position = "dodge") +
+  ggtitle("Humidité moyenne par Pays regrouper pas Continent") +
+  xlab("Continent") +
+  ylab("Humidité moyenne")
 
 ```
+
+Ce graphe nous montre l'Humidité moyenne pas Pays et regrouper par Continent 
+Ce graphe nous permet comparer l'Humidité moyenne entres les pays  
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+by_country <- group_by(data_weather, continent)
+country1<-summarise(by_country, humidity = mean(humidity))
+
+ggplot(country1, aes(continent, humidity)) + geom_col(aes(fill=continent)) +
+  ggtitle("Humidité moyenne par Continent") +
+  xlab("Continent") +
+  ylab("Humidité moyenne (%)") 
+
+```
+
+Ce graphe nous montre l'Humidité moyenne pas Continent
+On voit que le Continent Américain a une Humidité plus élevé avec 87%, aprés c'est l'Europe avec 75% et en dernier Arfique avec 50%.
 
 
 ```{r}
@@ -98,79 +146,6 @@ ggplot(data_weather, aes(x=speed , y=pressure)) + geom_point(aes(color=country))
   ylab("Préssion")
 ```
 
+Dans ce Graphe on a voulu voir s'il ya une relation ou une corrélation entre le vent et la pression atmosphérique 
+D'aprés les resultat qu'on voit sur graphe on voit pas une corrélation et même on peut pas deduire une relation entre ces 2 élément.
 
-```{r}
-library(ggplot2) 
-ggplot(data_weather, aes(x = country, y= mean(temp))) + geom_col(fill="blue")+
-  ggtitle("Température par Pays") +
-  xlab("Pays") +
-  ylab("Température")
-
-```
-
-
-```{r}
-library(dplyr)
-library(ggplot2)
-
-by_continent <- group_by(data_weather, continent)
-dt_continent<-summarise(by_continent, temp = mean(temp))
- 
-ggplot(dt_continent, aes(continent, temp)) + geom_col(fill="blue") +
-  ggtitle("Température par Continent") +
-  xlab("Continent") +
-  ylab("Température")
-
-```
-
-
-```{r}
-rp99$prop.proprio <- 0
-rp99[rp99$proprio >= mean(rp99$proprio), ]$prop.proprio <- 1
-rp99$prop.proprio <- factor(rp99$prop.proprio, 0:1, c("non", "oui"))
-ggplot(rp99) +
-  aes(x = dipl.aucun, y = tx.chom, size = pop.tot, colour = prop.proprio) +
-  geom_point(alpha = .5) +
-  xlab("% sans diplôme") +
-  ylab("Taux de chômage") +
-  labs(size = "Population totale", colour = "Proportion de propriétaires supérieure à la moyenne") +
-  theme(
-    legend.position = "bottom",
-    legend.box = "vertical"
-  )
-
-```
-
-
-```{r}
-library(dplyr)
-library(ggplot2)
-
-by_country <- group_by(data_weather, country)
-country1<-summarise(by_country, temp = mean(temp))
- 
-ggplot(country1, aes(country, temp)) + geom_col(fill="blue") +
-  ggtitle("Température par Continent") +
-  xlab("Pays") +
-  ylab("Température") +
-  scale_y_continuous(labels = scales::percent)
-
-```
-
-
-```{r}
-library(dplyr)
-library(ggplot2)
-
-by_country <- group_by(data_weather, country)
-country1<-summarise(by_country, temp = mean(temp))
- 
-ggplot(country1, aes(country, temp)) + geom_col(fill="blue") +
-  ggtitle("Température par Continent") +
-  xlab("Pays") +
-  ylab("Température") 
-#DT[order(as.numeric(rownames(DT)),decreasing = TRUE)]
-```
-
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
